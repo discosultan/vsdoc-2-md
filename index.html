@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Title</title>
+
+    <link rel="icon" href="favicon.ico">
+    <!-- <link rel="stylesheet" href="vendor/foundation.min.css"> -->
+    <link rel="stylesheet" href="vendor/dropzone.min.css">
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="layout.css">
+    <link rel="stylesheet" href="module.css">
+</head>
+
+<body class="viewport">
+    <section class="file-drop-section">
+        <form id="my-awesome-dropzone" action="/target" class="dropzone"></form>
+    </section>
+
+    <section class="content-section-container">
+        <section class="content-section">
+            <header class="content-header">MARKDOWN</header>
+            <section class="content">
+                <textarea class="markdown-editor">Raw Markdown</textarea>
+            </section>
+        </section>
+
+        <section class="content-section preview">
+            <header class="content-header">PREVIEW</header>
+            <section class="content">
+            </section>
+        </section>
+    </section>
+
+    <script src="vendor/marked.min.js"></script>
+    <script src="vendor/dropzone.min.js"></script>
+</body>
+
+</html>

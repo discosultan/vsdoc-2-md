@@ -1,0 +1,44 @@
+html {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    font: 62.5%/1.65 "Open Sans", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+body {
+    margin: 0;
+    overflow-x: hidden;
+    color: #3d4043;
+    font-size: 1.4rem;
+}
+body, html {
+    height: 100%;
+}
+body, html, pre {
+    width: 100%;
+}
+body, pre, textarea {
+    overflow: auto;
+}
+textarea {
+    min-width: 250px;
+    min-height: 10rem;
+    max-width: 500px;
+    height: auto;
+    line-height: 1.5;
+    user-select: text;
+    resize: vertical;
+    width: 100%;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main, menu, nav, section, summary {
+    display: block;
+}
+*, :after, :before {
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
