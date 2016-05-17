@@ -17,26 +17,73 @@
 
 <body class="viewport">
     <section class="file-drop-section">
-        <form id="my-awesome-dropzone" action="/target" class="dropzone"></form>
+        <!--<form id="my-awesome-dropzone" action="/target" class="dropzone"></form>-->
+        <label>
+            <input type="file" id="file-loader" name="file-loader" enctype="multipart/form-data"/>
+            File must be of Visual Studio generated xml documentation type!
+        </label>
     </section>
 
     <section class="content-section-container">
         <section class="content-section">
-            <header class="content-header">MARKDOWN</header>
+            <header class="content-header">
+                MARKDOWN
+                <button id="clipboard-copier" type="button">Copy To Clipboard</button>
+            </header>
             <section class="content">
-                <textarea class="markdown-editor">Raw Markdown</textarea>
+                <textarea id="markdown-editor" class="markdown-editor"></textarea>
             </section>
         </section>
 
         <section class="content-section preview">
             <header class="content-header">PREVIEW</header>
-            <section class="content">
+            <section class="content" id="markdown-preview">                
             </section>
         </section>
     </section>
 
     <script src="vendor/marked.min.js"></script>
     <script src="vendor/dropzone.min.js"></script>
+    <script src="converter.js"></script>
+    <script>
+        /* EventTarget extensions */
+        EventTarget.prototype.addEventListeners = function(types, listener, useCapture) {
+            for (var i = 0; i < types.length; i++) {
+                this.addEventListener(types[i], listener, useCapture);
+            }
+        } 
+        
+        /* Setup DOM elements */
+        var fileLoader = document.getElementById('file-loader');
+        var markdownEditor = document.getElementById('markdown-editor');
+        var markdownPreview = document.getElementById('markdown-preview');
+        var clipboardCopier = document.getElementById('clipboard-copier');
+        
+        fileLoader.addEventListener('change', onLoadFile, false);
+        markdownEditor.addEventListeners(['change', 'keyup', 'paste'], onChangeMarkdown, false);
+        clipboardCopier.addEventListener('click', onCopyToClipboard, false);        
+        
+        function onLoadFile(evt) {
+            var files = evt.target.files;
+            var file = files[0];
+            var reader = new FileReader();            
+            reader.onload = function() {
+                markdownEditor.value = Converter.vsdocToMarkdown(this.result);
+                onChangeMarkdown();
+            }
+            reader.readAsText(file);
+        }
+        
+        function onChangeMarkdown() {
+            markdownPreview.innerHTML = Converter.markdownToHtml(markdownEditor.value);
+        }      
+        
+        function onCopyToClipboard() {
+            markdownEditor.select();
+            var success = document.execCommand('copy');
+            document.getSelection().removeAllRanges();
+        }          
+    </script>
 </body>
 
 </html>
