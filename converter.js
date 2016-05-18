@@ -6,6 +6,6 @@ var Converter = {
     },
     
     markdownToHtml: function(markdown) {
-        return markdown;
+        return marked(markdown);
     }
 };
