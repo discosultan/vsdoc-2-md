@@ -1,8 +1,5 @@
 'use strict';
 
-var temp1;
-var temp2;
-
 var Converter = (function () {
     return {
         markdownToHtml: function (markdown) {
@@ -10,65 +7,119 @@ var Converter = (function () {
         },
 
         vsdocToMarkdown: function (vsdoc) {
-            var context = {
-                markdown: []
-            };
-
             var xml = new DOMParser().parseFromString(vsdoc, 'text/xml');
-            var xmlElement = parse(xml);
+            var obj = parseXmlToObj(xml);
 
-            elementToMarkdown(xmlElement);
+            console.log(obj);
 
-            console.log(xmlElement);
+            var context = {
+                markdown: [] // Output will be appended here.
+            };
+            processDoc(context, obj);
 
-
-            // var xmlDoc = $.parseXML(vsdoc);
-            // var $xml = $(xmlDoc);
-
-            // temp1 = xmlDoc;
-            // temp2 = $xml;
-
-            // elementToMarkdown(context, $xml[0]);
-
-            // return context.markdown.join('');
+            return context.markdown.join('');
         }
     }
 
-    function elementToMarkdown(context, element) {
-        if (element.nodeName === 'param' && context.lastNode === 'param') {
+    function processDoc(context, doc) {                
+        if (!doc.members) {
+            doc.members = [];
+        }
+        preprocessMembers(context, doc.members);
+
+        context.assembly = doc.assembly;
+        context.namespace = context.assembly;
+        var typeMemberNames = doc.members
+            .filter(function (member) { return member.type === 'T' })
+            .map(function (typeMember) { return typeMember.shortName });
+        if (typeMemberNames.length >= 2) {
+            var prefix = sharedStart([typeMemberNames[0], typeMemberNames[1]]);
+            // Remove the dot suffix.
+            context.namespace = prefix.substring(0, prefix.length - 1);
+        }
+
+        console.log(context.assembly);
+        console.log(context.namespace);
+
+        context.markdown.push('\n# ');
+        context.markdown.push(context.assembly);
+        context.markdown.push('\n\n');
+        processMembers(context, doc.members);
+        context.lastNode = 'doc';
+    }
+
+    function preprocessMembers(context, members) {
+        for (var i = 0; i < members.length; i++) {
+            var member = members[i];
+            member.type = member.name.substring(0, 1);
+            member.shortName = member.name.substring(2);
+            if (member.shortName === '#ctor') {
+                member.shortName = 'Constructor';
+            }
+        }
+    }
+
+    function processMembers(context, members) {
+        preprocess(context, members);
+
+        members.sort(function (a, b) { return a.shortName.localeCompare(b.shortName); });
+        for (var i = 0; i < members.length; i++) {
+            processMember(context, members[i]);
+        }
+        context.lastNode = 'members';
+    }
+
+    function processMember(context, member) {
+        preprocess(context, member);
+
+        console.log(member.type);
+
+        if (member.type === 'M') {
+            rearrangeParametersInContext(context, member);
+        } else if (member.type === 'T') {
+            context.markdown.push('\n## ');
+            context.markdown.push(member.shortName);
+            context.markdown.push('\n\n');
+        } else {
+            context.markdown.push('\n### ');
+            context.markdown.push(member.shortName);
+            context.markdown.push('\n\n');
+        }
+
+        context.lastNode = 'member';
+    }
+
+    function processSummary(context, summary) {
+        context.lastNode = 'summary';
+    }
+
+    function processParam(context, param) {
+        context.lastNode = 'param';
+    }
+
+    function processReturns(context, returns) {
+        context.lastNode = 'returns';
+    }
+
+    function processRemarks(context, remarks) {
+        context.lastNode = 'remarks';
+    }
+
+    function processException(context, exception) {
+        context.lastNode = 'excepton';
+    }
+
+    function preprocess(context, obj) {
+        if (context.lastNode === 'param') {
             context.markdown.push('\n');
         }
+    }
 
-        if (element.nodeName === 'doc') {
-            for (var i = 0; i < element.children.length; i++) {
-                var child = element.children[i];
-                if (child.nodeName === 'assembly') {
-                    context.assembly = child.find('name').text();
-                    context.markdown.push('\n# ');
-                    context.markdown.push(context.assembly);
-                    context.markdown.push('\n');
-                } else if (child.nodeName === 'members') {
-                    elementToMarkdown(context, child);
-                }
-            }
-        } else if (element.nodeName === 'members') {
+    function rearrangeParametersInContext(context, member) {
 
-        } else if (element.nodeName === 'member') {
-
-        } else if (element.nodeName === 'summary') {
-
-        } else if (element.nodeName === 'param') {
-
-        } else if (element.nodeName === 'returns') {
-        } else if (element.nodeName === 'remarks') {
-        } else if (element.nodeName === 'exception') {
-        }
-
-        context.lastNode = element.nodeName;
     }
 
     // Ref: https://andrew.stwrt.ca/posts/js-xml-parsing/
-
     // flattens an object (recursively!), similarly to Array#flatten
     // e.g. flatten({ a: { b: { c: "hello!" } } }); // => "hello!"
     function flatten(object) {
@@ -76,7 +127,8 @@ var Converter = (function () {
         return check ? flatten(_.values(object)[0]) : object;
     }
 
-    function parse(xml) {
+    // Ref: https://andrew.stwrt.ca/posts/js-xml-parsing/
+    function parseXmlToObj(xml) {
         var data = {};
 
         var isText = xml.nodeType === 3,
@@ -103,14 +155,14 @@ var Converter = (function () {
             }, {});
         }
 
-        // recursively call #parse over children, adding results to data
+        // recursively call #parseXmlToObj over children, adding results to data
         _.each(xml.children, function (child) {
             var name = child.nodeName;
 
             // if we've not come across a child with this nodeType, add it as an object
             // and return here
             if (!_.has(data, name)) {
-                data[name] = parse(child);
+                data[name] = parseXmlToObj(child);
                 return;
             }
 
@@ -119,7 +171,7 @@ var Converter = (function () {
             if (!_.isArray(data[name])) { data[name] = [data[name]]; }
 
             // and finally, append the new child
-            data[name].push(parse(child));
+            data[name].push(parseXmlToObj(child));
         });
 
         // if we can, let's fold some attributes into the body
@@ -134,5 +186,14 @@ var Converter = (function () {
 
         // simplify to reduce number of final leaf nodes and return
         return flatten(data);
+    }
+
+    // Ref: http://stackoverflow.com/a/1917041/1466456
+    function sharedStart(array) {
+        console.log(array);
+        var A = array.concat().sort(),
+            a1 = A[0], a2 = A[A.length - 1], L = a1.length, i = 0;
+        while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
+        return a1.substring(0, i);
     }
 })();
