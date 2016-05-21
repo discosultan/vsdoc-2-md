@@ -67,7 +67,8 @@
         dropzone.addEventListener('drop', onDropToDropzone, false);        
         dropzoneDialog.addEventListener('change', onLoadDialogFile, false);        
         markdownEditor.addEventListeners(['change', 'keyup', 'paste'], onChangeMarkdown, false);
-        clipboardCopier.addEventListener('click', onCopyToClipboard, false);                
+        markdownEditor.addEventListener('scroll', onScrollMarkdownEditor, false);
+        clipboardCopier.addEventListener('click', onCopyToClipboard, false);
         
         /* Event handlers */
         function onDragEnterDropzone(evt) {         
@@ -114,6 +115,11 @@
         function onChangeMarkdown() {
             markdownPreview.innerHTML = Converter.markdownToHtml(markdownEditor.value);
         }      
+        
+        function onScrollMarkdownEditor(evt) {            
+            var scrollProgress = markdownEditor.scrollTop / markdownEditor.scrollHeight;            
+            markdownPreview.scrollTop = markdownPreview.scrollHeight * scrollProgress;
+        }
         
         function onCopyToClipboard() {
             markdownEditor.select();
