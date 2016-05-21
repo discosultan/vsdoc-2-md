@@ -1,7 +1,6 @@
 'use strict';
 
-var temp;
-var Converter = (function () {
+var Convert = (function () {
     /* Preprocess pass */
 
     function preprocessDoc(ctx, doc) {
@@ -179,8 +178,6 @@ var Converter = (function () {
             var xml = new DOMParser().parseFromString(vsdoc, 'text/xml');
 
             var doc = xml.children[0];
-            temp = doc;
-            console.log(doc);
 
             var ctx = {
                 markdown: [] // Output will be appended here.
