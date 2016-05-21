@@ -17,7 +17,7 @@
 </head>
 
 <body class="viewport">
-    <section class="file-drop-section">
+    <section id="file-drop-section" class="file-drop-section initial">
         <!--<form id="my-awesome-dropzone" action="/target" class="dropzone"></form>-->
         <label>
             <input type="file" id="file-loader" name="file-loader" enctype="multipart/form-data"/>
@@ -61,6 +61,7 @@
         } 
         
         /* Setup DOM elements */
+        var fileDropSection = document.getElementById('file-drop-section');        
         var fileLoader = document.getElementById('file-loader');
         var markdownEditor = document.getElementById('markdown-editor');
         var markdownPreview = document.getElementById('markdown-preview');
@@ -76,6 +77,7 @@
             var reader = new FileReader();            
             reader.onload = function() {
                 markdownEditor.value = Converter.vsdocToMarkdown(this.result);
+                fileDropSection.classList.remove('initial');
                 onChangeMarkdown();
             }
             reader.readAsText(file);

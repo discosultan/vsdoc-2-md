@@ -37,6 +37,14 @@
     font-weight: 200;
 }
 
+.file-drop-section {
+    transition: height 750ms; 
+}
+
+.file-drop-section.initial {
+    height: 100%;
+}
+
 .dropzone, .dropzone * {
     box-sizing: border-box;
 }
