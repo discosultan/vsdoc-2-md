@@ -1,6 +1,5 @@
 'use strict';
 
-var temp;
 var Convert = (function () {
     var processorMap = {
         'doc': processDoc,
@@ -34,11 +33,14 @@ var Convert = (function () {
             processChildren(ctx, xml);
             return ctx.markdown.join('');
         }
-    }
+    };
     
     /* Process pass */
 
     function processChildren(ctx, node) {
+        if (node.nodeType === Node.ELEMENT_NODE) {            
+            node.innerHTML = node.innerHTML.trim();
+        }
         for (var i = 0; i < node.childNodes.length; i++) {
             var childNode = node.childNodes[i];
             var processor = processorMap[childNode.nodeName];
@@ -48,6 +50,7 @@ var Convert = (function () {
 
     function processDoc(ctx, docNode) {
         processChildren(ctx, docNode);
+        
         ctx.lastNode = 'doc';
     }
     
@@ -119,10 +122,9 @@ var Convert = (function () {
     }
 
     function processSummary(ctx, summaryNode) {                
-        summaryNode.innerHTML = summaryNode.innerHTML.trim();
-        temp = summaryNode.innerHTML;
         processChildren(ctx, summaryNode);
         ctx.markdown.push('\n\n');
+        
         ctx.lastNode = 'summary';
         ctx.lastMemberElement = ctx.lastNode;
     }
@@ -140,7 +142,7 @@ var Convert = (function () {
         if (paramType) {
             ctx.markdown.push(paramType);
         } else {
-            ctx.markdown.push('Unknown type')
+            ctx.markdown.push('Unknown type');
         }
         ctx.markdown.push('*<br>');
         processChildren(ctx, paramNode);        
@@ -201,8 +203,8 @@ var Convert = (function () {
                 ctx.markdown.push(href);
                 ctx.markdown.push('</a>');
             }     
-        }                        
-                
+        }
+        
         ctx.lastNode = 'see';
     }
     
@@ -210,6 +212,7 @@ var Convert = (function () {
         ctx.markdown.push('`');
         ctx.markdown.push(cNode.textContent);
         ctx.markdown.push('`');
+        
         ctx.lastNode = 'c';
     }
     
@@ -217,6 +220,7 @@ var Convert = (function () {
         if (textNode.nodeValue.trim().length > 0) {            
             ctx.markdown.push(textNode.nodeValue.replace(/\s+/g, ' '));
         }
+        
         ctx.lastNode = '#text';
     }
 

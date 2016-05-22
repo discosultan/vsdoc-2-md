@@ -66,23 +66,37 @@ article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main
     max-height: 100%;
 }
 
-.button {
+.button, .button-dark {
     border: none;
     outline: none;
     background-color: transparent;
-    padding: 1rem;
-    color: #7070FF;   
+    padding: 0.8rem;       
     font-weight: bold;     
 }
-.button:hover {
-    background-color: #7070FF;
+.button {
+    color: #7070FF;
+}
+.button-dark {
     color: white;
+}
+.button:hover, .button-dark:hover {    
     border-radius: 2px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
     cursor: pointer;
 }
+.button:hover {
+     background-color: #7070FF;
+    color: white;
+}
+.button-dark:hover {
+    background-color: white;
+    color: #7070FF;
+}
 .button:active {
     background-color: #4040FF;
+}
+.button-dark:active {
+    background-color: #E8E9EC;
 }
 
 .dropzone-container {
@@ -107,11 +121,9 @@ article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main
 .dropzone {
     padding: 0;
     border-radius: 5px;
-    /*border: 2px dashed #0087F7;*/
     border: 2px dashed #7070FF;        
     box-sizing: border-box;
     background-color: #FFFFFF;    
-    /*color: rgba(109, 109, 109, 1.0);*/
     color: #3d4043;
     font-size: 2rem;   
     width: 100%;
@@ -135,8 +147,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main
 }
 .dropzone.hover {
     border-style: solid;    
-    color: rgb(192, 196, 203);
-    /*color: rgba(109, 109, 109, 0.5);*/
+    color: rgb(192, 196, 203);    
 }
 
 .content-section-container {
@@ -233,6 +244,26 @@ article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main
     font-size: 1.8rem;
     line-height: 1.5em;
     font-weight: 200;
+}
+
+.error-curtain {
+    position: absolute;
+    top: 0;
+    right: 1rem;
+    width: 25%;    
+    background-color: #7070FF;
+    border-radius: 0 0 5px 5px;
+    padding: 1rem;
+    color: white;
+    transition: transform 750ms;
+}
+
+.error-curtain a {
+    color: white;
+}
+
+.error-curtain--closed {
+    transform: translateY(-100%);
 }
 
 /****************/
