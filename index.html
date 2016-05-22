@@ -15,10 +15,12 @@
 
 <body class="viewport">
     <section id="dropzone-container" class="dropzone-container initial">
-        <section id="dropzone" class="dropzone initial">            
+        <section id="dropzone" class="dropzone initial">
+            <img src="img/loading.gif" alt="Loading" class="transparent">            
             Drag & drop Visual Studio XML documentation file here or click to browse.
+            <img id="loading-indicator" src="img/loading.gif" alt="Loading" class="transparent">
         </section>
-        <input type="file" id="dropzone-dialog" name="dropzone-dialog" class="hide" />
+        <input type="file" accept=".xml" id="dropzone-dialog" name="dropzone-dialog" class="hide" />
     </section>
 
     <section class="content-section-container">
@@ -63,6 +65,7 @@
         var markdownEditor = document.getElementById('markdown-editor');
         var markdownPreview = document.getElementById('markdown-preview');
         var clipboardCopier = document.getElementById('clipboard-copier');
+        var loadingIndicator = document.getElementById('loading-indicator');
         
         /* Subscribe to events */
         dropzone.addEventListener('dragenter', onDragEnterDropzone, false);
@@ -107,12 +110,16 @@
         }
         
         function loadFile(file) {
+            console.log(file);
+            loadingIndicator.classList.remove('transparent');
             var reader = new FileReader();
             reader.onload = function() {
                 markdownEditor.value = Convert.vsdocToMarkdown(this.result);                
-                onChangeMarkdown();
+                onChangeMarkdown();                
                 dropzoneContainer.classList.remove('initial');
                 dropzone.classList.remove('initial');
+                loadingIndicator.classList.add('transparent');
+                dropzone.innerHTML = 'Loaded ' + file.name;                
             }
             reader.readAsText(file);
         }              

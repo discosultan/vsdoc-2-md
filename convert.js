@@ -1,5 +1,6 @@
 'use strict';
 
+var temp;
 var Convert = (function () {
     var processorMap = {
         'doc': processDoc,
@@ -12,6 +13,7 @@ var Convert = (function () {
         'returns': processReturns,
         'exception': processException,
         'see': processSee,
+        'seealso': processSee,
         'c': processC,
         '#text': processText
     };
@@ -22,8 +24,9 @@ var Convert = (function () {
         },
 
         vsdocToMarkdown: function (vsdoc) {
-            var xml = new DOMParser().parseFromString(vsdoc, 'text/xml');
-            var ctx = {
+            var parser = new DOMParser();
+            var xml = parser.parseFromString(vsdoc, 'text/xml');
+            var ctx = {                
                 markdown: [], // Output will be appended here.
                 paramTypes: {}
             };
@@ -52,7 +55,7 @@ var Convert = (function () {
         var assemblyNameNode = assemblyNode.children[0];
         ctx.assembly = assemblyNameNode.textContent;
         
-        ctx.markdown.push('\n# ');
+        ctx.markdown.push('# ');
         ctx.markdown.push(ctx.assembly);
         ctx.markdown.push('\n\n');
         
@@ -112,16 +115,20 @@ var Convert = (function () {
         processChildren(ctx, memberNode);        
 
         ctx.lastNode = 'member';
+        ctx.lastMemberElement = undefined;
     }
 
-    function processSummary(ctx, summaryNode) {        
+    function processSummary(ctx, summaryNode) {                
+        summaryNode.innerHTML = summaryNode.innerHTML.trim();
+        temp = summaryNode.innerHTML;
         processChildren(ctx, summaryNode);
         ctx.markdown.push('\n\n');
         ctx.lastNode = 'summary';
+        ctx.lastMemberElement = ctx.lastNode;
     }
 
     function processParam(ctx, paramNode) {
-        if (ctx.lastNode !== 'param') {
+        if (ctx.lastMemberElement !== 'param') {
             ctx.markdown.push('| Name | Description |\n');
             ctx.markdown.push('| ---- | ----------- |\n');
         }
@@ -135,50 +142,67 @@ var Convert = (function () {
         } else {
             ctx.markdown.push('Unknown type')
         }
-        ctx.markdown.push('* <br>');
-        ctx.markdown.push(paramNode.textContent);
+        ctx.markdown.push('*<br>');
+        processChildren(ctx, paramNode);        
         ctx.markdown.push(' |\n');
         
         ctx.lastNode = 'param';
+        ctx.lastMemberElement = ctx.lastNode;
     }
 
     function processReturns(ctx, returnsNode) {
-        var returns = returnsNode.textContent;
-        returns = returns.replace('/\s+/', ' ');
-        
-        ctx.markdown.push('\n#### Returns\n\n');
-        ctx.markdown.push(returns);
+        ctx.markdown.push('\n#### Returns\n\n');        
+        processChildren(ctx, returnsNode);
         ctx.markdown.push('\n\n');
         
         ctx.lastNode = 'returns';
+        ctx.lastMemberElement = ctx.lastNode;
     }
 
     function processRemarks(ctx, remarksNode) {
-        var remarks = remarksNode.textContent;
-        remarks = remarks.replace('/\s+/', ' ');
-        
-        ctx.markdown.push('\n#### Remarks\n\n');
-        ctx.markdown.push(remarks);
+        ctx.markdown.push('\n#### Remarks\n\n');        
+        processChildren(ctx, remarksNode);
         ctx.markdown.push('\n\n');
         
         ctx.lastNode = 'remarks';
+        ctx.lastMemberElement = ctx.lastNode;
     }
 
     function processException(ctx, exceptionNode) {
         var exName = exceptionNode.getAttribute('cref').substring(2);
-        var ex = exceptionNode.textContent.replace(/\s+/, ' ');
+        exName = exName.substring(exName.lastIndexOf('.') + 1);
         
         ctx.markdown.push('*');
         ctx.markdown.push(exName);
-        ctx.markdown.push(':* ');
-        ctx.markdown.push(ex);
+        ctx.markdown.push(':* ');        
+        processChildren(ctx, exceptionNode);
         ctx.markdown.push('\n\n');
         
         ctx.lastNode = 'exception';
+        ctx.lastMemberElement = ctx.lastNode;
     }
     
     function processSee(ctx, seeNode) {
-        ctx.markdown.push(seeNode.getAttribute('cref'));
+        var cref = seeNode.getAttribute('cref'); // For example: T:System.String        
+        if (cref) { 
+            var typeName = cref.substring(2);
+            typeName = typeName.substring(typeName.lastIndexOf('.') + 1);
+            ctx.markdown.push('<a href="#');
+            ctx.markdown.push(typeName.toLowerCase());
+            ctx.markdown.push('">')
+            ctx.markdown.push(typeName);
+            ctx.markdown.push('</a>');            
+        } else {
+            var href = seeNode.getAttribute('href'); // For example: http://stackoverflow.com/
+            if (href) {                                
+                ctx.markdown.push('<a href="');
+                ctx.markdown.push(href);
+                ctx.markdown.push('">')
+                ctx.markdown.push(href);
+                ctx.markdown.push('</a>');
+            }     
+        }                        
+                
         ctx.lastNode = 'see';
     }
     
@@ -189,8 +213,10 @@ var Convert = (function () {
         ctx.lastNode = 'c';
     }
     
-    function processText(ctx, textNode) {
-        ctx.markdown.push(textNode.nodeValue.replace(/\s+/, ' '));
+    function processText(ctx, textNode) {        
+        if (textNode.nodeValue.trim().length > 0) {            
+            ctx.markdown.push(textNode.nodeValue.replace(/\s+/g, ' '));
+        }
         ctx.lastNode = '#text';
     }
 
