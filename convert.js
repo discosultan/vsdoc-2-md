@@ -9,17 +9,20 @@ var Convert = (function () {
         'member': processMember,
         'summary': processSummary,
         'remarks': processRemarks,
+        'para': processPara,
         'param': processParam,
         'returns': processReturns,
         'exception': processException,
         'see': processSee,
-        'seealso': processSee,
+        'seealso': processSeealso,
         'c': processC,
         '#text': processText
     };
     
     return {
         markdownToHtml: function (markdown) {
+            // We use a vendor provided markdown to html parser called marked.
+            // Ref: https://github.com/chjj/marked
             return marked(markdown);
         },
 
@@ -38,10 +41,7 @@ var Convert = (function () {
     
     /* Process pass */
 
-    function processChildren(ctx, node) {
-        // if (node.nodeType === Node.ELEMENT_NODE) {
-        //     node.innerHTML = node.innerHTML.trim();
-        // }
+    function processChildren(ctx, node) {        
         for (var i = 0; i < node.childNodes.length; i++) {
             ctx.first = i === 0;
             ctx.last = i === node.childNodes.length;
@@ -139,7 +139,7 @@ var Convert = (function () {
 
     function processParam(ctx, paramNode) {
         if (ctx.lastMemberElement !== 'param') {
-            ctx.markdown.push('| Name | Description |\n');
+            ctx.markdown.push('\n| Name | Description |\n');
             ctx.markdown.push('| ---- | ----------- |\n');
         }
         var paramName = paramNode.getAttribute('name');
@@ -182,9 +182,9 @@ var Convert = (function () {
         var cref = exceptionNode.getAttribute('cref');
         if (cref) {
             var exName = cref.substring(2);
-            exName = exName.substring(exName.lastIndexOf('.') + 1);
+            exName = exName.replace(ctx.namespace + '.', '');
             
-            ctx.markdown.push('*');
+            ctx.markdown.push('\n*');
             ctx.markdown.push(exName);
             ctx.markdown.push(':* ');        
             processChildren(ctx, exceptionNode);
@@ -198,8 +198,8 @@ var Convert = (function () {
     function processSee(ctx, seeNode) {
         var cref = seeNode.getAttribute('cref'); // For example: T:System.String        
         if (cref) { 
-            var typeName = cref.substring(2);
-            typeName = typeName.substring(typeName.lastIndexOf('.') + 1);
+            var typeName = cref.substring(2);            
+            typeName = typeName.replace(ctx.namespace + '.', '');
             ctx.markdown.push('<a href="#');
             ctx.markdown.push(typeName.toLowerCase());
             ctx.markdown.push('">')
@@ -217,6 +217,18 @@ var Convert = (function () {
         }
         
         ctx.lastNode = 'see';
+    }
+    
+    function processSeealso(ctx, seealsoNode) {
+        if (ctx.lastMemberElement !== 'seealso') {        
+            ctx.markdown.push('\n#### See also\n\n');
+        }
+        ctx.markdown.push('- ');
+        processSee(ctx, seealsoNode);
+        ctx.markdown.push('\n');
+        
+        ctx.lastNode = 'seealso';
+        ctx.lastMemberElement = ctx.lastNode;
     }
     
     function processC(ctx, cNode) {
@@ -241,6 +253,12 @@ var Convert = (function () {
         }
         
         ctx.lastNode = '#text';
+    }
+    
+    function processPara(ctx, paraNode) {
+        processChildren(ctx, paraNode);
+        ctx.markdown.push('\n\n');
+        ctx.lastNode = 'para';
     }
 
     /* Process pass ends here */

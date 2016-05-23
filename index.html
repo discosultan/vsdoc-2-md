@@ -10,7 +10,7 @@
     <!--<link rel="icon" href="favicon.ico">-->
     <link rel="stylesheet" href="vendor/normalize.min.css">
     <link rel="stylesheet" href="vendor/github-markdown.css">
-    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="viewport">
@@ -21,8 +21,8 @@
                  ondragover="onDragOverDropzone(event)"
                  ondragleave="onDragLeaveDropzone(event, this)"
                  ondrop="onDragLeaveDropzone(event, this); onDropToDropzone(event)"
-                 onclick="onClickDropzone(event)">            
-            <img src="img/loading.gif" alt="Loading" class="transparent" width="48" height="48">            
+                 onclick="onClickDropzone(event)">
+            <img src="img/loading.gif" alt="Loading" class="transparent" width="48" height="48">
             Drag & drop Visual Studio XML documentation file here or click to browse.
             <img id="loading-indicator" src="img/loading.gif" alt="Loading" width="48" height="48" class="transparent">
         </section>
@@ -34,7 +34,7 @@
         <section class="content-section">
             <header class="content-header">
                 MARKDOWN                
-                <button class="button" type="button" onclick="onCopyToClipboard()">                    
+                <button class="button" type="button" onclick="onCopyToClipboard()">
                     COPY TO CLIPBOARD
                 </button>
             </header>
@@ -120,7 +120,9 @@
                     onChangeMarkdown();                
                     dropzoneContainer.classList.remove('initial');
                     dropzone.classList.remove('initial');                    
-                    dropzone.innerHTML = file.name;     
+                    dropzone.innerHTML = file.name;
+                    markdownEditor.scrollTop = 0;
+                    markdownPreview.scrollTop = 0;     
                 } catch (err) {
                     handleError(err);
                 }
