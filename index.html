@@ -38,11 +38,9 @@
                     COPY TO CLIPBOARD
                 </button>
             </header>
-            <section class="content">
-                <textarea id="markdown-editor" class="markdown-editor"
-                          onchange="onChangeMarkdown()"
-                          onkeyup="onChangeMarkdown()"
-                          onpaste="onChangeMarkdown()"
+            <section class="content">                
+                <textarea id="markdown-editor" class="markdown-editor"                          
+                          oninput="onChangeMarkdown()"
                           onscroll="onScrollMarkdownEditor()">
                 </textarea>
             </section>
@@ -135,7 +133,7 @@
             }
         }              
         
-        function onChangeMarkdown() {
+        function onChangeMarkdown() {            
             try {
                 markdownPreview.innerHTML = Convert.markdownToHtml(markdownEditor.value);
             } catch (err) {
