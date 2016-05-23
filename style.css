@@ -28,18 +28,15 @@ body, html, pre {
 body, pre, textarea {
     overflow: auto;
 }
-textarea {
-    min-width: 250px;
-    min-height: 10rem;
-    max-width: 500px;
+textarea {    
     height: auto;
-    line-height: 1.5;
-    user-select: text;
+    line-height: 1.5;    
     resize: vertical;
     width: 100%;
     -webkit-user-select: text;
     -moz-user-select: text;
     -ms-user-select: text;
+    user-select: text;
 }
 article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main, menu, nav, section, summary {
     display: block;
@@ -85,7 +82,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main
     cursor: pointer;
 }
 .button:hover {
-     background-color: #7070FF;
+    background-color: #7070FF;
     color: white;
 }
 .button-dark:hover {
@@ -257,13 +254,16 @@ article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main
     color: white;
     transition: transform 750ms;
 }
-
 .error-curtain a {
     color: white;
 }
-
 .error-curtain--closed {
     transform: translateY(-100%);
+}
+
+.error-curtain-content {
+    margin-bottom: 1rem;
+    min-height: 15rem;    
 }
 
 /****************/

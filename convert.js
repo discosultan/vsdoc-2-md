@@ -4,6 +4,7 @@ var Convert = (function () {
     var processorMap = {
         'doc': processDoc,
         'assembly': processAssembly,
+        'name': processName,
         'members': processMembers,
         'member': processMember,
         'summary': processSummary,
@@ -38,10 +39,12 @@ var Convert = (function () {
     /* Process pass */
 
     function processChildren(ctx, node) {
-        if (node.nodeType === Node.ELEMENT_NODE) {            
-            node.innerHTML = node.innerHTML.trim();
-        }
+        // if (node.nodeType === Node.ELEMENT_NODE) {
+        //     node.innerHTML = node.innerHTML.trim();
+        // }
         for (var i = 0; i < node.childNodes.length; i++) {
+            ctx.first = i === 0;
+            ctx.last = i === node.childNodes.length;
             var childNode = node.childNodes[i];
             var processor = processorMap[childNode.nodeName];
             if (processor) processor(ctx, childNode);
@@ -54,36 +57,41 @@ var Convert = (function () {
         ctx.lastNode = 'doc';
     }
     
-    function processAssembly(ctx, assemblyNode) {
-        var assemblyNameNode = assemblyNode.children[0];
-        ctx.assembly = assemblyNameNode.textContent;
-        
+    function processAssembly(ctx, assemblyNode) {        
         ctx.markdown.push('# ');
-        ctx.markdown.push(ctx.assembly);
+        processChildren(ctx, assemblyNode);        
         ctx.markdown.push('\n\n');
         
         ctx.lastNode = 'assembly';
     }
 
+    function processName(ctx, nameNode) {
+        ctx.markdown.push(nameNode.textContent);
+                
+        ctx.lastNode = 'name';
+    }
+
     function processMembers(ctx, membersNode) {
         // 1. Extract type and name from members.
-        var childNodes = [];
-        for (var i = 0; i < membersNode.children.length; i++) {
-            var childNode = membersNode.children[i];
-            var childName = childNode.getAttribute('name');
-            childNode.type = childName.substring(0, 1);
-            childNode.name = childName.substring(2);
-            childNodes.push(childNode);
+        var childElements = [];
+        for (var i = 0; i < membersNode.childNodes.length; i++) {
+            var childNode = membersNode.childNodes[i];
+            if (childNode.nodeType === Node.ELEMENT_NODE) {
+                var childName = childNode.getAttribute('name');
+                childNode.type = childName.substring(0, 1);
+                childNode.name = childName.substring(2);
+                childElements.push(childNode);
+            }
         }
         
         // 2. Sort members by their name.                
-        childNodes.sort(function (a, b) { 
+        childElements.sort(function (a, b) { 
             return a.name.localeCompare(b.name); 
         });
         
         // 3. Process members.
-        for (var i = 0; i < childNodes.length; i++) {
-            processMember(ctx, childNodes[i]);
+        for (var i = 0; i < childElements.length; i++) {
+            processMember(ctx, childElements[i]);
         }
         
         ctx.lastNode = 'members';
@@ -171,14 +179,17 @@ var Convert = (function () {
     }
 
     function processException(ctx, exceptionNode) {
-        var exName = exceptionNode.getAttribute('cref').substring(2);
-        exName = exName.substring(exName.lastIndexOf('.') + 1);
-        
-        ctx.markdown.push('*');
-        ctx.markdown.push(exName);
-        ctx.markdown.push(':* ');        
-        processChildren(ctx, exceptionNode);
-        ctx.markdown.push('\n\n');
+        var cref = exceptionNode.getAttribute('cref');
+        if (cref) {
+            var exName = cref.substring(2);
+            exName = exName.substring(exName.lastIndexOf('.') + 1);
+            
+            ctx.markdown.push('*');
+            ctx.markdown.push(exName);
+            ctx.markdown.push(':* ');        
+            processChildren(ctx, exceptionNode);
+            ctx.markdown.push('\n\n');
+        }
         
         ctx.lastNode = 'exception';
         ctx.lastMemberElement = ctx.lastNode;
@@ -216,7 +227,15 @@ var Convert = (function () {
         ctx.lastNode = 'c';
     }
     
-    function processText(ctx, textNode) {        
+    function processText(ctx, textNode) {
+        if (ctx.first) {
+            textNode.nodeValue = trimStart(textNode.nodeValue);
+        }
+        if (ctx.last) {
+            textNode.nodeValue = trimEnd(textNode.nodeValue);
+        }
+        
+        // Append text only if it contains any characters other than whitespace.
         if (textNode.nodeValue.trim().length > 0) {            
             ctx.markdown.push(textNode.nodeValue.replace(/\s+/g, ' '));
         }
@@ -240,8 +259,8 @@ var Convert = (function () {
         }
         
         var paramNodes = [];
-        for (var i = 0; i < memberNode.children.length; i++) {
-            var childNode = memberNode.children[i];
+        for (var i = 0; i < memberNode.childNodes.length; i++) {
+            var childNode = memberNode.childNodes[i];
             if (childNode.nodeName === 'param') {
                 paramNodes.push(childNode);
             }
@@ -262,5 +281,13 @@ var Convert = (function () {
         
         var newMethodPrototype = methodPrototype.replace(/\(.*\)/, '(' + newParamString + ')');
         return newMethodPrototype;
+    }
+    
+    function trimStart(value) {
+        return value.replace(/^\s+/, '');
+    }
+    
+    function trimEnd(value) {
+        return value.replace(/\s+$/, '');
     }
 })();

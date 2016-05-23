@@ -61,7 +61,7 @@
     <section id="error-curtain" class="error-curtain error-curtain--closed">
         <p>Ops, something went wrong! ^^</p>
         <p>Please consider <a href="https://github.com/discosultan/vsdoc-2-md/issues">opening an issue on GitHub</a>.</p>
-        <textarea id="error-curtain-content"></textarea>
+        <textarea id="error-curtain-content" class="error-curtain-content"></textarea>
         <button type="button" class="button-dark" onclick="onCloseErrorCurtain()">CLOSE</button>
     </section>
     
@@ -76,7 +76,7 @@
         var markdownPreview = document.getElementById('markdown-preview');        
         var loadingIndicator = document.getElementById('loading-indicator');
         var errorCurtain = document.getElementById('error-curtain');
-        var errorCurtainContent = document.getElementById('error-curtain-content'); 
+        var errorCurtainContent = document.getElementById('error-curtain-content');
         
         /* Event handlers */
         function onDragEnterDropzone(evt, elem) {         
@@ -144,7 +144,7 @@
         function handleError(err) {
             if (console) console.error(err);
             errorCurtain.classList.remove('error-curtain--closed');            
-            errorCurtainContent.value = err;
+            errorCurtainContent.value = err.stack;
         }   
         
         function onScrollMarkdownEditor() {            
@@ -154,8 +154,8 @@
         
         function onCopyToClipboard() {
             markdownEditor.select();
-            var success = document.execCommand('copy');
-            document.getSelection().removeAllRanges();
+            var success = document.execCommand('copy');  
+            markdownEditor.selectionEnd = 0; // This deselects the selection.            
         }
         
         function onCloseErrorCurtain() {
