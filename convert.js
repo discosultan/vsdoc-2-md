@@ -51,7 +51,9 @@ var Convert = (function () {
         }
     };
     
+    /*********************/
     /* 1. Tag processors */
+    /*********************/
 
     function process(ctx, node) {
         for (var i = 0; i < node.childNodes.length; i++) {
@@ -355,10 +357,10 @@ var Convert = (function () {
         process(ctx, paraNode);
         ctx.markdown.push('\n');
     }
-
-    /* 1. Tag processors end here */
     
+    /****************/
     /* 2. Utilities */
+    /****************/
 
     function rearrangeParametersInContext(ctx, memberNode) {
         var methodPrototype = memberNode.name;
@@ -443,6 +445,4 @@ var Convert = (function () {
             break;
         }
     }
-    
-    /* 2. Utilities end here */
 })();
