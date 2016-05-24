@@ -142,7 +142,7 @@
         }   
         
         function handleError(err) {
-            if (console) console.error(err);
+            if (console && console.error) console.error(err);
             errorCurtain.classList.remove('error-curtain--closed');            
             errorCurtainContent.value = err.stack;
         }   
@@ -152,10 +152,14 @@
             markdownPreview.scrollTop = (markdownPreview.scrollHeight - markdownPreview.offsetHeight) * scrollProgress;
         }
         
-        function onCopyToClipboard() {
+        function onCopyToClipboard() {            
+            // Select all the text in the editor.
             markdownEditor.select();
-            var success = document.execCommand('copy');  
-            markdownEditor.selectionEnd = 0; // This deselects the selection.            
+            // Execute 'copy' command.
+            var success = document.execCommand('copy');
+            // Deselect all the text in the editor.            
+            window.getSelection().removeAllRanges(); // Does not work in IE11 nor Firefox!
+            // markdownEditor.selectionEnd = 0; // Jumps to top in IE11 and Firefox!
         }
         
         function onCloseErrorCurtain() {
