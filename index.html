@@ -39,7 +39,7 @@
                 </button>
             </header>
             <section class="content">                
-                <textarea id="markdown-editor" class="markdown-editor"                          
+                <textarea id="markdown-editor" class="markdown-editor" spellcheck="false"                          
                           oninput="onChangeMarkdown()"
                           onscroll="onScrollMarkdownEditor()">
                 </textarea>
@@ -59,7 +59,7 @@
     <section id="error-curtain" class="error-curtain error-curtain--closed">
         <p>Ops, something went wrong! ^^</p>
         <p>Please consider <a href="https://github.com/discosultan/vsdoc-2-md/issues">opening an issue on GitHub</a>.</p>
-        <textarea id="error-curtain-content" class="error-curtain-content"></textarea>
+        <textarea id="error-curtain-content" class="error-curtain-content" spellcheck="false"></textarea>
         <button type="button" class="button-dark" onclick="onCloseErrorCurtain()">CLOSE</button>
     </section>
     
@@ -147,7 +147,7 @@
             errorCurtainContent.value = err.stack;
         }   
         
-        function onScrollMarkdownEditor() {            
+        function onScrollMarkdownEditor() {
             var scrollProgress = markdownEditor.scrollTop / (markdownEditor.scrollHeight - markdownEditor.offsetHeight);            
             markdownPreview.scrollTop = (markdownPreview.scrollHeight - markdownPreview.offsetHeight) * scrollProgress;
         }
