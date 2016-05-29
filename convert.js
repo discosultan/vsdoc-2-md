@@ -41,12 +41,17 @@ var Convert = (function () {
             var xml = parser.parseFromString(vsdoc, 'text/xml');
             var ctx = {                
                 markdown: [], // Output will be appended here.
-                paramTypes: {},
-                nodeStack: []
+                paramTypes: {}, // Used to map method signature names to types.
+                nodeStack: [], // Used to keep track of current position in the node tree.
+                types: [], // Table of contents will be generated based on types in assembly.
+                indices: {} // Keeps track of indices of different document parts to later inject content.
             };
             
             stripEmptyTextNodes(xml);
             process(ctx, xml);
+            
+            // Attach table of contents before members.
+            ctx.markdown.splice(ctx.indices.members, 0, getTableOfContents(ctx));            
             return ctx.markdown.join('');
         }
     };
@@ -77,10 +82,12 @@ var Convert = (function () {
         var nameNode = findChildNode(assemblyNode, 'name');
         ctx.markdown.push('# ');        
         ctx.markdown.push(nameNode.textContent);
-        ctx.markdown.push('\n');
+        ctx.markdown.push('\n');        
     }
 
     function processMembers(ctx, membersNode) {
+        ctx.indices.members = ctx.markdown.length;
+        
         // 1. Extract type and name from members.
         var childElements = [];
         for (var i = 0; i < membersNode.childNodes.length; i++) {
@@ -118,6 +125,8 @@ var Convert = (function () {
             ctx.markdown.push('\n\n## ');
             ctx.markdown.push(name);
             ctx.markdown.push('\n');
+            
+            ctx.types.push(name);
         } else { 
             if (type === 'M') {
                 name = rearrangeParametersInContext(ctx, memberNode);
@@ -444,5 +453,32 @@ var Convert = (function () {
             }
             break;
         }
+    }
+    
+    function getTableOfContents(ctx) {
+        var numTypes = ctx.types.length;
+        var numTypesPerRow = 2;
+        var numRows = Math.ceil(numTypes / numTypesPerRow);
+        var tableOfContents = ['\n<table>\n<tbody>\n'];
+        
+        for (var i = 0; i < numRows; i++) {
+            tableOfContents.push('<tr>\n');
+            
+            for (var j = 0; j < numTypesPerRow; j++) {
+                var type = ctx.types[i*numTypesPerRow + j];
+                if (type) {
+                    tableOfContents.push('<td><a href="#');            
+                    tableOfContents.push(type.toLowerCase());
+                    tableOfContents.push('">');
+                    tableOfContents.push(type);
+                    tableOfContents.push('</a></td>\n');
+                }
+            }
+            
+            tableOfContents.push('</tr>\n');
+        }
+        
+        tableOfContents.push('</tbody>\n</table>\n');
+        return tableOfContents.join('');
     }
 })();
