@@ -379,7 +379,11 @@ var Convert = (function () {
         }        
                 
         var paramString = matches[1].replace(' ', '');
-        var paramTypes = paramString.split(',');
+        // Params are separated by commas. However, generic type params also use
+        // commas as a separator. In order to avoid an invalid split, we must 
+        // not match commas within braces {}.
+        var matchCommasExceptForInBraces = /,(?![^\{]*\})/g;
+        var paramTypes = paramString.split(matchCommasExceptForInBraces);
         if (paramTypes.length === 0) {
             return methodPrototype;
         }
