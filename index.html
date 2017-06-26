@@ -8,9 +8,9 @@
     <title>vsdoc-2-md</title>
 
     <!--<link rel="icon" href="favicon.ico">-->
-    <link rel="stylesheet" href="vendor/normalize.min.css">
-    <link rel="stylesheet" href="vendor/github-markdown.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./vendor/normalize.css">
+    <link rel="stylesheet" href="./vendor/github-markdown.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body class="viewport">
@@ -22,9 +22,9 @@
                  ondragleave="onDragLeaveDropzone(event, this)"
                  ondrop="onDragLeaveDropzone(event, this); onDropToDropzone(event)"
                  onclick="onClickDropzone(event)">
-            <img src="img/loading.gif" alt="Loading" class="transparent" width="48" height="48">
-            Drag & drop Visual Studio XML documentation file here or click to browse.
-            <img id="loading-indicator" src="img/loading.gif" alt="Loading" width="48" height="48" class="transparent">
+            <img src="./img/loading.gif" alt="Loading" class="transparent" width="48" height="48">
+            Drag &amp; drop Visual Studio XML documentation file here or click to browse.
+            <img id="loading-indicator" src="./img/loading.gif" alt="Loading" width="48" height="48" class="transparent">
         </section>
         <input type="file" accept=".xml" id="dropzone-dialog" name="dropzone-dialog" class="hide" onchange="onLoadDialogFile(event)" />
     </section>
@@ -33,13 +33,13 @@
     <section class="content-section-container">
         <section class="content-section">
             <header class="content-header">
-                MARKDOWN                
+                MARKDOWN
                 <button class="button" type="button" onclick="onCopyToClipboard()">
                     COPY TO CLIPBOARD
                 </button>
             </header>
-            <section class="content">                
-                <textarea id="markdown-editor" class="markdown-editor" spellcheck="false"                          
+            <section class="content">
+                <textarea id="markdown-editor" class="markdown-editor" spellcheck="false"
                           oninput="onChangeMarkdown()"
                           onscroll="onScrollMarkdownEditor()">
                 </textarea>
@@ -62,30 +62,30 @@
         <textarea id="error-curtain-content" class="error-curtain-content" spellcheck="false"></textarea>
         <button type="button" class="button-dark" onclick="onCloseErrorCurtain()">CLOSE</button>
     </section>
-    
-    <script src="vendor/marked.min.js"></script>
-    <script src="convert.js"></script>
+
+    <script src="./vendor/marked.min.js"></script>
+    <script src="./convert.js"></script>
     <script>
         /* Get DOM element references */
         var dropzoneContainer = document.getElementById('dropzone-container');
         var dropzone = document.getElementById('dropzone');
         var dropzoneDialog = document.getElementById('dropzone-dialog');
         var markdownEditor = document.getElementById('markdown-editor');
-        var markdownPreview = document.getElementById('markdown-preview');        
+        var markdownPreview = document.getElementById('markdown-preview');
         var loadingIndicator = document.getElementById('loading-indicator');
         var errorCurtain = document.getElementById('error-curtain');
         var errorCurtainContent = document.getElementById('error-curtain-content');
-        
+
         /* Event handlers */
-        function onDragEnterDropzone(evt, elem) {         
+        function onDragEnterDropzone(evt, elem) {
             evt.dataTransfer.dropEffect = 'copy';
             elem.classList.add('hover');
         }
-        
-        function onDragOverDropzone(evt) {            
+
+        function onDragOverDropzone(evt) {
             evt.preventDefault();
         }
-        
+
         function onDragLeaveDropzone(evt, elem) {
             elem.classList.remove('hover');
         }
@@ -95,76 +95,76 @@
                 dropzoneDialog.click();
             }
         }
-        
-        function onDropToDropzone(evt) {            
+
+        function onDropToDropzone(evt) {
             evt.preventDefault();
             var file = evt.dataTransfer.files[0];
             loadFile(file);
         }
-        
-        function onLoadDialogFile(evt) {            
+
+        function onLoadDialogFile(evt) {
             var files = evt.target.files;
             if (files.length > 0) {
-                loadFile(files[0]);        
+                loadFile(files[0]);
             }
         }
-        
-        function loadFile(file) {            
+
+        function loadFile(file) {
             loadingIndicator.classList.remove('transparent');
             var reader = new FileReader();
             reader.onload = function() {
-                try {                    
+                try {
                     markdownEditor.value = Convert.vsdocToMarkdown(this.result);
-                    onChangeMarkdown();                
+                    onChangeMarkdown();
                     dropzoneContainer.classList.remove('initial');
-                    dropzone.classList.remove('initial');                    
+                    dropzone.classList.remove('initial');
                     dropzone.innerHTML = file.name;
                     markdownEditor.scrollTop = 0;
-                    markdownPreview.scrollTop = 0;     
+                    markdownPreview.scrollTop = 0;
                 } catch (err) {
                     handleError(err);
                 }
-                loadingIndicator.classList.add('transparent');                           
+                loadingIndicator.classList.add('transparent');
             }
             try {
                 reader.readAsText(file);
             } catch (err) {
                 handleError(err);
             }
-        }              
-        
-        function onChangeMarkdown() {            
+        }
+
+        function onChangeMarkdown() {
             try {
                 markdownPreview.innerHTML = Convert.markdownToHtml(markdownEditor.value);
             } catch (err) {
                 handleError(err);
             }
-        }   
-        
+        }
+
         function handleError(err) {
             if (console && console.error) console.error(err);
-            errorCurtain.classList.remove('error-curtain--closed');            
+            errorCurtain.classList.remove('error-curtain--closed');
             errorCurtainContent.value = err.stack;
-        }   
-        
+        }
+
         function onScrollMarkdownEditor() {
-            var scrollProgress = markdownEditor.scrollTop / (markdownEditor.scrollHeight - markdownEditor.offsetHeight);            
+            var scrollProgress = markdownEditor.scrollTop / (markdownEditor.scrollHeight - markdownEditor.offsetHeight);
             markdownPreview.scrollTop = (markdownPreview.scrollHeight - markdownPreview.offsetHeight) * scrollProgress;
         }
-        
-        function onCopyToClipboard() {            
+
+        function onCopyToClipboard() {
             // Select all the text in the editor.
             markdownEditor.select();
             // Execute 'copy' command.
             var success = document.execCommand('copy');
-            // Deselect all the text in the editor.            
+            // Deselect all the text in the editor.
             window.getSelection().removeAllRanges(); // Does not work in IE11 nor Firefox!
             // markdownEditor.selectionEnd = 0; // Jumps to top in IE11 and Firefox!
         }
-        
+
         function onCloseErrorCurtain() {
             errorCurtain.classList.add('error-curtain--closed');
-        }        
+        }
     </script>
 </body>
 
