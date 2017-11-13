@@ -1,6 +1,6 @@
 /*  1. Base
     2. Modules
-    3. Utilities 
+    3. Utilities
 */
 
 /***********/
@@ -247,7 +247,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, hr, i, main
     position: absolute;
     top: 0;
     right: 1rem;
-    width: 25%;    
+    width: 25%;
     background-color: #7070FF;
     border-radius: 0 0 5px 5px;
     padding: 1rem;

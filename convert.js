@@ -28,7 +28,7 @@ var Convert = (function () {
         'c': processC,
         '#text': processText
     };
-    
+
     return {
         markdownToHtml: function (markdown) {
             // We use a vendor provided markdown to html parser called marked.
@@ -55,7 +55,7 @@ var Convert = (function () {
             return ctx.markdown.join('');
         }
     };
-    
+
     /*********************/
     /* 1. Tag processors */
     /*********************/
@@ -63,7 +63,7 @@ var Convert = (function () {
     function process(ctx, node) {
         for (var i = 0; i < node.childNodes.length; i++) {
             var childNode = node.childNodes[i];
-            
+
             ctx.previousNode = (i === 0) ? undefined : node.childNodes[i - 1].nodeName;
             ctx.nextNode = (i === node.childNodes.length - 1) ? undefined : node.childNodes[i + 1].nodeName;
 
@@ -77,7 +77,7 @@ var Convert = (function () {
     function processDoc(ctx, docNode) {
         process(ctx, docNode);
     }
-    
+
     function processAssembly(ctx, assemblyNode) {
         var nameNode = findChildNode(assemblyNode, 'name');
         ctx.markdown.push('# ');
@@ -101,10 +101,10 @@ var Convert = (function () {
         }
 
         // 2. Sort members by their name.
-        childElements.sort(function (a, b) { 
-            return a.name.localeCompare(b.name); 
+        childElements.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
         });
-        
+
         // 3. Append sorted nodes back to their parent.
         for (var i = 0; i < childElements.length; i++) {
             membersNode.appendChild(childElements[i]);
@@ -121,13 +121,13 @@ var Convert = (function () {
             ctx.namespace = name.substring(0, name.lastIndexOf('.'));
             name = name.replace(ctx.namespace + '.', '');
             ctx.typeName = name;
-            
+
             ctx.markdown.push('\n\n## ');
             ctx.markdown.push(name);
             ctx.markdown.push('\n');
 
             ctx.types.push(name);
-        } else { 
+        } else {
             if (type === 'M') {
                 name = rearrangeParametersInContext(ctx, memberNode);
             }
@@ -173,7 +173,7 @@ var Convert = (function () {
     function processParam(ctx, paramNode) {
         var paramName = paramNode.getAttribute('name');
         var paramType = ctx.paramTypes[paramName];
-        
+
         if (ctx.previousNode !== 'param') {
             ctx.markdown.push('\n| Name | Description |\n');
             ctx.markdown.push('| ---- | ----------- |\n');
@@ -224,7 +224,7 @@ var Convert = (function () {
 
             var permissionName = sanitizeMarkdown(cref.substring(2));
             permissionName = permissionName.replace(ctx.namespace + '.', '');
-            
+
             ctx.markdown.push('- ');
             ctx.markdown.push(permissionName);
             ctx.markdown.push(': ')
@@ -249,7 +249,7 @@ var Convert = (function () {
 
     function processList(ctx, listNode) {
         var type = listNode.getAttribute('type');
-        var newline = (ctx.nodeStack[ctx.nodeStack.length - 2] === 'param') ? '<br>' : '\n'; 
+        var newline = (ctx.nodeStack[ctx.nodeStack.length - 2] === 'param') ? '<br>' : '\n';
         if (type) {
             ctx.markdown.push(newline);
             if (type === 'table') {
@@ -273,7 +273,7 @@ var Convert = (function () {
                     ctx.markdown.push(newline);
                 }
             } else {
-                var prefixFn; 
+                var prefixFn;
                 if (type === 'number') {
                     var counter = 1;
                     prefixFn = function() { return counter++ + '. '; };
@@ -329,8 +329,8 @@ var Convert = (function () {
     }
 
     function processSee(ctx, seeNode) {
-        var cref = seeNode.getAttribute('cref'); // For example: T:System.String        
-        if (cref) { 
+        var cref = seeNode.getAttribute('cref'); // For example: T:System.String
+        if (cref) {
             var typeName = sanitizeMarkdown(cref.substring(2));
             typeName = typeName.replace(ctx.namespace + '.', '');
             ctx.markdown.push('<a href="#');
@@ -354,7 +354,7 @@ var Convert = (function () {
         ctx.markdown.push('`');
         ctx.markdown.push(cNode.textContent);
         ctx.markdown.push('`');
-    }   
+    }
 
     function processText(ctx, textNode) {
         if (!ctx.previousNode || ctx.previousNode === 'list' || ctx.previousNode === 'code') {
@@ -378,26 +378,26 @@ var Convert = (function () {
     /****************/
 
     function tabsToSpaces(input) {
-		return input.replace(/\t/g, '    ');
-	}
+        return input.replace(/\t/g, '    ');
+    }
 
     function removeInitialLineFeed(input) {
-		return input.replace(/^(?:\r?\n|\r)/, '');
-	}
+        return input.replace(/^(?:\r?\n|\r)/, '');
+    }
 
     function removeIndent(input) {
-		var indents = input.match(/^[^\S\n\r]*(?=\S)/gm);
+        var indents = input.match(/^[^\S\n\r]*(?=\S)/gm);
 
-		if (!indents || !indents[0].length)
-			return input;
+        if (!indents || !indents[0].length)
+            return input;
 
-		indents.sort(function(a, b){return a.length - b.length; });
+        indents.sort(function(a, b) { return a.length - b.length; });
 
-		if (!indents[0].length)
-			return input;
+        if (!indents[0].length)
+            return input;
 
-		return input.replace(new RegExp('^' + indents[0], 'gm'), '');
-	}
+        return input.replace(new RegExp('^' + indents[0], 'gm'), '');
+    }
 
     function rearrangeParametersInContext(ctx, memberNode) {
         var methodPrototype = memberNode.name;
@@ -408,7 +408,7 @@ var Convert = (function () {
 
         var paramString = matches[1].replace(' ', '');
         // Params are separated by commas. However, generic type params also use
-        // commas as a separator. In order to avoid an invalid split, we must 
+        // commas as a separator. In order to avoid an invalid split, we must
         // not match commas within braces {}.
         var matchCommasExceptForInBraces = /,(?![^\{]*\})/g;
         var paramTypes = paramString.split(matchCommasExceptForInBraces);
