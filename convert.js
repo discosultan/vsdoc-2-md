@@ -204,8 +204,14 @@ var Convert = (function () {
     }
 
     function processExample(ctx, exampleNode) {
+        var exampleCode = tabsToSpaces(exampleNode.childNodes[0].nodeValue);
+        exampleCode = removeInitialLineFeed(exampleCode);
+        exampleCode = removeIndent(exampleCode);
+
         ctx.markdown.push('\n#### Example\n\n');
-        process(ctx, exampleNode);
+        ctx.markdown.push('\n```\n');
+        ctx.markdown.push(exampleCode);
+        ctx.markdown.push('\n```\n');
         ctx.markdown.push('\n');
     }
 
@@ -370,6 +376,28 @@ var Convert = (function () {
     /****************/
     /* 2. Utilities */
     /****************/
+
+    function tabsToSpaces(input) {
+		return input.replace(/\t/g, '    ');
+	}
+
+    function removeInitialLineFeed(input) {
+		return input.replace(/^(?:\r?\n|\r)/, '');
+	}
+
+    function removeIndent(input) {
+		var indents = input.match(/^[^\S\n\r]*(?=\S)/gm);
+
+		if (!indents || !indents[0].length)
+			return input;
+
+		indents.sort(function(a, b){return a.length - b.length; });
+
+		if (!indents[0].length)
+			return input;
+
+		return input.replace(new RegExp('^' + indents[0], 'gm'), '');
+	}
 
     function rearrangeParametersInContext(ctx, memberNode) {
         var methodPrototype = memberNode.name;
