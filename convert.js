@@ -236,7 +236,7 @@ var Convert = (function () {
     function processException(ctx, exceptionNode) {
         var cref = exceptionNode.getAttribute('cref');
         if (cref) {
-            var exName = sanitizeMarkdown(cref.substring(2));
+            var exName = sanitizeMarkdown(cref);
             exName = exName.replace(ctx.namespace + '.', '');
 
             ctx.markdown.push('\n*');
